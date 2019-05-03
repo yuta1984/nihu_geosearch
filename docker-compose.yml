@@ -1,0 +1,35 @@
+version: '3'
+services:
+### NGINX  #####################################
+  web:
+    image: nginx:latest
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./app:/var/www/html
+    depends_on:
+      - php
+### php-fpm #####################################
+# volumesの値が重複しているのは必要なようです https://oki2a24.com/2018/07/30/point-of-nginx-php-fpm-simple-doccker-compose/
+  php:
+    build: ./php
+    volumes:
+      - ./app:/var/www/html
+    depends_on:
+      - db
+### MySQL #####################################
+  db:
+    image: mysql:5.7
+    ports:
+      - 3306:3306
+    volumes:
+      - ./mysql/conf:/etc/mysql/conf.d
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d
+      - ./mysql/log:/var/log/mysql
+    environment:
+      MYSQL_DATABASE: locales
+      MYSQL_ROOT_PASSWORD: mmjmmj
+      TZ: 'Asia/Tokyo'
+    container_name: db
